@@ -1,5 +1,7 @@
-using ConsultorioApi.Data;
+using ConsultorioAPI.Data;
+using ConsultorioAPI.Services;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using System;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddHttpClient<ViaCepServices>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -19,13 +23,15 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
+    app.MapOpenApi();
+    app.MapScalarApiReference(options =>
     {
-        options.RoutePrefix = "swagger";
+        options.WithTitle("Consult�rio")
+        .WithTheme(ScalarTheme.DeepSpace);
     });
 
 }
+
 
 app.UseHttpsRedirection();
 

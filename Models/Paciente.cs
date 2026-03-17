@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace ConsultorioAPI.Models
+﻿namespace ConsultorioAPI.Models
 {
     using System.ComponentModel.DataAnnotations;
     public class Paciente

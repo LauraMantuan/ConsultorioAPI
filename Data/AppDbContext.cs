@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ConsultorioAPI.Models;
 
-namespace ConsultorioApi.Data
+namespace ConsultorioAPI.Data
 {
     public class AppDbContext : DbContext
     {
@@ -9,7 +9,16 @@ namespace ConsultorioApi.Data
         {
         }
         public DbSet<Paciente> Pacientes { get; set; }
+        public DbSet<Consultorio> Consultorios { get; set; }
+        public DbSet<Medico> Medicos { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Paciente>().HasIndex (p => p.Email).IsUnique();
+            modelBuilder.Entity<Paciente>().HasIndex(p => p.Cpf).IsUnique();
+
+        }
 
     }
 }
