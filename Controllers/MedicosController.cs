@@ -1,10 +1,10 @@
-﻿using ConsultorioAPI.Models;
-using Medico.Data;
-using Medico.Models;
+﻿using ConsultorioAPI.Data;
+using ConsultorioAPI.DTOs;
+using ConsultorioAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Medicos.Controllers
+namespace ConsultorioAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -17,30 +17,46 @@ namespace Medicos.Controllers
 
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Medicos>>> GetMedico()
+        public async Task<IActionResult> GetMedicos()
         {
-            var medico = await _context.medicos.ToListAsync();
-            return medico;
-        }
-        [HttpPost]
-        public async Task<ActionResult<Medico>> PostMedico(Medico medico)
-        {
-
-
-            _context.medicos.Add(medico);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(Getmedico), new { id = medico.Id }, medico);
-
+            var medicos = await _context.Medicos.ToListAsync();
+            return Ok(medicos);
         }
 
         [HttpGet("{id}")]
-
-        public async Task<ActionResult<Medico>> GetMedico(int id)
+        public async Task<ActionResult<MedicoResponseDto>> GetMedico(int id)
         {
-            var medico = await _context.medicos.FindAsync(id);
-            if (medico == null) return NotFound();
-            return medico;
+            var medico = await _context.Medicos
+                .Include(m => m.Consultorio)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+
+            if (medico == null) return NotFound("Médico não encontrado");
+
+            var medicoDto = new MedicoResponseDto
+            {
+                Id = medico.Id,
+                Nome = medico.Nome,
+                Crm = medico.Crm,
+                ConsultorioId = medico.ConsultorioId,
+                ConsultorioNome = medico.Consultorio.Nome
+            };
+            return Ok(medicoDto);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Medico>> PostMedico(Medico medico)
+        {
+            //var consutorioEx= await _context.Consultorios.FindAsync(medico.ConsultorioId);
+            //if (consutorioEx == null) {
+
+            var consultorioEx = await _context.Consultorios.AnyAsync(c => c.Id == medico.ConsultorioId);
+
+            _context.Medicos.Add(medico);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(medico), new { id = medico.Id }, medico);
+
         }
 
         public async Task<ActionResult> PutMedico(int id, Medico medico)
@@ -50,17 +66,13 @@ namespace Medicos.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var medicoExistente = await _context.medicos.FindAsync(id);
+            var medicoExistente = await _context.Medicos.FindAsync(id);
 
-            if (medicoExistente == null) { return NotFound(); }
-
-            if (await _context.medicos.AnyAsync(p => (p.Cpf == medico.Cpf || p.Email == medico.Email) && p.Id != id))
-            {
-                return BadRequest("CPF ou Email já existe para outro medico.");
-            }
+            if (medicoExistente == null) return NotFound();
 
             medicoExistente.Nome = medico.Nome;
-            medicoExistente.Cpf = medico.Crm;
+            medicoExistente.Crm = medico.Crm;
+            medicoExistente.ConsultorioId = medico.ConsultorioId;
 
             _context.Update(medicoExistente);
             await _context.SaveChangesAsync();
@@ -68,19 +80,18 @@ namespace Medicos.Controllers
         }
 
 
-
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Deletemedico(int id)
+        public async Task<IActionResult> DeleteMedico(int id)
         {
-            var medico = await _context.medicos.FindAsync(id);
+            var medico = await _context.Medicos.FindAsync(id);
             if (medico == null)
             {
-                return NotFound();
+                return NotFound("Medico nao encontrado");
             }
-            _context.medicos.Remove(medico);
+            _context.Medicos.Remove(medico);
             await _context.SaveChangesAsync();
             return NoContent();
         }
     }
 }
-}
+

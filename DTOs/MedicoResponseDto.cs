@@ -1,15 +1,11 @@
-﻿namespace ConsultorioAPI.Models
+﻿namespace ConsultorioAPI.DTOs
 {
-    public class Medico
+    public class MedicoResponseDto
     {
         public int Id { get; set; }
-
         public string Nome { get; set; }
-
         public int Crm { get; set; }
-
         public int ConsultorioId { get; set; }
-
-        public Consultorio? Consultorio { get; set; }
+        public string ConsultorioNome { get; set; }
     }
 }

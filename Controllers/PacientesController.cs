@@ -34,7 +34,6 @@ namespace ConsultorioAPI.Controllers
         }
 
         [HttpGet("{id}")]
-
         public async Task<ActionResult<Paciente>> GetPaciente(int id)
         {
             var paciente = await _context.Pacientes.FindAsync(id);
@@ -66,21 +65,21 @@ namespace ConsultorioAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok(pacienteExistente);
         }
-        
 
 
-            [HttpDelete("{id}")]
-            public async Task<IActionResult> DeletePaciente(int id)
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePaciente(int id)
+        {
+            var paciente = await _context.Pacientes.FindAsync(id);
+            if (paciente == null)
             {
-                var paciente = await _context.Pacientes.FindAsync(id);
-                if (paciente == null)
-                {
-                    return NotFound();
-                }
-                _context.Pacientes.Remove(paciente);
-                await _context.SaveChangesAsync();
-                return NoContent();
+                return NotFound();
             }
+            _context.Pacientes.Remove(paciente);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }
+

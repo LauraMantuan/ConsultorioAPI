@@ -1,6 +1,8 @@
-﻿namespace ConsultorioAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ConsultorioAPI.Models
 {
-    using System.ComponentModel.DataAnnotations;
+    
     public class Paciente
     {
         public int Id { get; set; }

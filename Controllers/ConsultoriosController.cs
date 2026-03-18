@@ -82,10 +82,10 @@ namespace ConsultorioAPI.Controllers
             else
             {
                 var enderecoViaCep = await _viaCepService.BuscarEnderecoAsync(consultorio.Cep);
-                enderecoExistente.Logradouro = enderecoExistente= Logradouro;
-                enderecoExistente.Bairro = enderecoViaCep.Bairro;
-                enderecoExistente.Localidade = enderecoViaCep.Localidade;
-                enderecoExistente.Uf = enderecoViaCep.Uf;
+                enderecoExistente.Logradouro = enderecoViaCep.logradouro;
+                enderecoExistente.Bairro = enderecoViaCep.bairro;
+                enderecoExistente.Localidade = enderecoViaCep.localidade;
+                enderecoExistente.Uf = enderecoViaCep.uf;
             }
             enderecoExistente.Nome = consultorio.Nome;
             enderecoExistente.Numero = consultorio.Numero;
