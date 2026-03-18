@@ -20,28 +20,39 @@ namespace ConsultorioAPI.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Consulta>>> GetConsultas()
     {
-        var consulta = await _context.Consultas.ToListAsync();
-        return consulta;
+        var consultas = await _context.Consultas
+                .Include(c=> c.Paciente). Include(c=> c.Medico).ToListAsync();
+            return consultas;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Consulta>> GetConsulta(int id)
     {
-        var consulta = await _context.Consultas.FindAsync(id);
-        if (consulta == null) return NotFound();
+            var consulta = await _context.Consultas
+                    .Include(c => c.Paciente).Include(c => c.Medico)
+                    .FirstOrDefaultAsync(c=> c.Id== id);
+            if (consulta == null) return NotFound();
         return consulta;
     }
 
     [HttpPost]
     public async Task<ActionResult<Consulta>> PostConsulta(Consulta consulta)
     {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        _context.Consultas.Add(consulta);
-        await _context.SaveChangesAsync();
+            var paciente = await _context.Pacientes.FindAsync(consulta.PacienteId);
+            if (paciente == null) return BadRequest("Paciente não encontrado.");
+
+            var medico = await _context.Medicos.AnyAsync(c=> c.Id==consulta.MedicoId);
+            if (!medico) return BadRequest("Médico não encontrado.");
+
+
+            _context.Consultas.Add(consulta);
+             await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetConsulta), new { id = consulta.Id }, consulta);
 
-    }
+    }   
 
         public async Task<ActionResult> PutConsulta(int id, Consulta consulta)
         {
@@ -51,8 +62,13 @@ namespace ConsultorioAPI.Controllers
                 return BadRequest(ModelState);
             }
             var consultaExistente = await _context.Consultas.FindAsync(id);
-
             if (consultaExistente == null) return NotFound();
+
+            var paciente = await _context.Pacientes.FindAsync(consulta.PacienteId);
+            if (paciente == null) return BadRequest("Paciente não encontrado.");
+
+            var medico = await _context.Medicos.AnyAsync(c => c.Id == consulta.MedicoId);
+            if (!medico) return BadRequest("Médico não encontrado.");
 
             consultaExistente.PacienteId = consulta.PacienteId;
             consultaExistente.DataHora = consulta.DataHora;
